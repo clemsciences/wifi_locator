@@ -44,7 +44,7 @@ public class MainActivity extends Activity {
     Button bouton_capture_instantane;
     Button bouton_capture_5s;
     Button bouton_capture_10s;
-    Button bouton_enregistrer_lieu;
+//    Button bouton_enregistrer_lieu;
     Button bouton_estimer_lieu;
     private EditText entree_lieu;
     EditText texte_lieu_estimation;
@@ -60,10 +60,16 @@ public class MainActivity extends Activity {
     String FILENAME = "wifi_data";
     String JSON_EXTENSION = ".json";
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static final int REQUEST_LOCATION = 1;
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
             Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    private static String[] PERMISSIONS_LOCATION = {
+            Manifest.permission.ACCESS_COARSE_LOCATION,
+            Manifest.permission.ACCESS_FINE_LOCATION
     };
 
     @Override
@@ -71,27 +77,32 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        bouton_capture_instantane = (Button) findViewById(R.id.bouton_capture_instantane);
-        bouton_capture_5s = (Button) findViewById(R.id.bouton_capture_5s);
-        bouton_capture_10s = (Button) findViewById(R.id.bouton_capture_10s);
-        bouton_estimer_lieu = (Button) findViewById(R.id.bouton_estimer_lieu);
+        bouton_capture_instantane = findViewById(R.id.bouton_capture_instantane);
+        bouton_capture_5s = findViewById(R.id.bouton_capture_5s);
+        bouton_capture_10s = findViewById(R.id.bouton_capture_10s);
+        bouton_estimer_lieu = findViewById(R.id.bouton_estimer_lieu);
 
-        entree_lieu = (EditText) findViewById(R.id.entree_lieu);
-        texte_lieu_estimation = (EditText) findViewById(R.id.texte_lieu_estimation);
+        entree_lieu = findViewById(R.id.entree_lieu);
+        texte_lieu_estimation = findViewById(R.id.texte_lieu_estimation);
 
 
         verifyStoragePermissions( MainActivity.this);
+        verifyLocationPermissions(MainActivity.this);
+
+        // Activer le WEIFI
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Wifi");
         builder.setMessage("Voulez-vous activer le Wifi ?");
         builder.setCancelable(false);
-        builder.setPositiveButton("Non", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("Non", new DialogInterface.OnClickListener()
+        {
             public void onClick(DialogInterface dialog, int id) {
                 dialog.dismiss();
             }
         });
-        builder.setNegativeButton("Oui", new DialogInterface.OnClickListener() {
+        builder.setNegativeButton("Oui", new DialogInterface.OnClickListener()
+        {
             public void onClick(DialogInterface dialog, int id) {
                 startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
             }
@@ -113,11 +124,11 @@ public class MainActivity extends Activity {
         //enregistrement du fichier !
 
         bouton_capture_instantane.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        store_capture(wm.getScanResults());
-
-                        for (ScanResult sr : wm.getScanResults()) {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "on a cliqué !");
+                store_capture(wm.getScanResults());
+                for (ScanResult sr : wm.getScanResults()) {
                     Log.d("SSID : " + sr.SSID, TAG);
                     Log.d("BSSID : " + sr.BSSID, TAG);
                     Log.d("capabilities : " + sr.capabilities, TAG);
@@ -130,6 +141,7 @@ public class MainActivity extends Activity {
         bouton_capture_5s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "on a cliqué !");
                 scan_wifi_signals(5000);
             }
         });
@@ -137,6 +149,7 @@ public class MainActivity extends Activity {
         bouton_capture_10s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "on a cliqué !");
                 scan_wifi_signals(10000);
             }
         });
@@ -145,6 +158,7 @@ public class MainActivity extends Activity {
         bouton_estimer_lieu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.d(TAG, "on a cliqué !");
 
             }
         });
@@ -159,45 +173,55 @@ public class MainActivity extends Activity {
             store_capture(wm.getScanResults());
         }
         else {
+
+
+            measuring = true;
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
-                    long debut = System.currentTimeMillis();
+                    long measure_beginning = System.currentTimeMillis();
                     setButtonsClickable(false);
                     serie_mesures = new ArrayList<>();
+                    derniere = System.currentTimeMillis();
+                    // On commence les mesures
                     while (measuring) {
                         maintenant = System.currentTimeMillis();
                         if (maintenant - derniere > entre_mesures) {
                             serie_mesures.add(wm.getScanResults());
                             derniere = maintenant;
                         }
-                        if(maintenant - debut > duration)
+                        if(maintenant - measure_beginning > duration)
                         {
                             measuring = false;
                         }
                     }
+                    Log.d(TAG, "taille de la liste de mesures : " + serie_mesures.size());
                     store_capture_lists(serie_mesures);
                     setButtonsClickable(true);
                 }
             };
+
         Thread t = new Thread(r);
+
         t.start();
+
         }
     }
 
-    public JSONArray from_scan_result_to_json(List<ScanResult> lsr)
-    {
+    public JSONObject from_scan_result_to_json(List<ScanResult> lsr) throws JSONException {
         Date currentTime = Calendar.getInstance().getTime();
+        JSONObject element;
         JSONArray json_array;
         JSONObject object;
         int i = 0;
+        element = new JSONObject();
         json_array = new JSONArray();
         for (ScanResult sr : lsr) {
-            Log.d("SSID : " + sr.SSID, TAG);
-            Log.d("BSSID : " + sr.BSSID, TAG);
-            Log.d("capabilities : " + sr.capabilities, TAG);
-            Log.d("frequency : " + sr.frequency, TAG);
-            Log.d("level : " + sr.level, TAG);
+            Log.d(TAG, "SSID : " + sr.SSID);
+            Log.d(TAG, "BSSID : " + sr.BSSID);
+            Log.d(TAG, "capabilities : " + sr.capabilities);
+            Log.d(TAG, "frequency : " + sr.frequency);
+            Log.d(TAG, "level : " + sr.level );
             try {
                 object = new JSONObject();
                 object.put("ssid", sr.SSID);
@@ -206,15 +230,8 @@ public class MainActivity extends Activity {
                 object.put("frequency", sr.frequency);
                 object.put("level", sr.level);
                 object.put("timestamp", currentTime.toString());
-                String lieu = entree_lieu.getText().toString();
-                if(lieu.equals(""))
-                {
-                    object.put("location", "NOWHERE");
-                }
-                else
-                {
-                    object.put("location", lieu);
-                }
+
+
                 json_array.put(i, object);
                 i++;
             } catch (JSONException e) {
@@ -222,8 +239,18 @@ public class MainActivity extends Activity {
                     Log.e(TAG, "Problème avec les données JSON");
             }
         }
+        element.put("fingerprint", json_array);
+        String lieu = entree_lieu.getText().toString();
+        if(lieu.equals(""))
+        {
+            element.put("location", "NOWHERE");
+        }
+        else
+        {
+            element.put("location", lieu);
+        }
         Log.d(TAG, json_array.toString());
-        return json_array;
+        return element;
     }
 
     public void store_capture(List<ScanResult> lsr)
@@ -232,9 +259,13 @@ public class MainActivity extends Activity {
         Date currentTime = Calendar.getInstance().getTime();
         FileOutputStream fos = null;
         OutputStreamWriter osw = null;
-        JSONArray json_array;
+        JSONObject element = new JSONObject();
         // converting
-        json_array = from_scan_result_to_json(lsr);
+        try {
+            element = from_scan_result_to_json(lsr);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         // storing
         try {
@@ -253,11 +284,11 @@ public class MainActivity extends Activity {
             fos = new FileOutputStream(json_file);
             osw = new OutputStreamWriter(fos);
             if (BuildConfig.DEBUG) {
-                Log.d(TAG, json_array.toString());
+                Log.d(TAG, element.toString());
                 Log.d(TAG, osw.toString());
             }
 
-            osw.write(json_array.toString());
+            osw.write(element.toString());
         } catch (FileNotFoundException e) {
             if (BuildConfig.DEBUG)
                 Log.e(TAG, "new FileOutputStream()", e);
@@ -291,13 +322,23 @@ public class MainActivity extends Activity {
         FileOutputStream fos = null;
         OutputStreamWriter osw = null;
         JSONArray l_array;
-        JSONArray json_array;
+        JSONObject json_array = new JSONObject();
         int j = 0;
         l_array = new JSONArray();
         // converting
+        if (BuildConfig.DEBUG)
+            Log.d(TAG, "store list capture");
         for(List<ScanResult> lsr: llsr)
         {
-            json_array = from_scan_result_to_json(lsr);
+            try {
+                json_array = from_scan_result_to_json(lsr);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "j : " + j);
+                Log.d(TAG, json_array.toString());
+            }
 
             try {
                 l_array.put(j, json_array);
@@ -355,6 +396,15 @@ public class MainActivity extends Activity {
 
     }
 
+    public static void verifyLocationPermissions(Activity activity)
+    {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if( permission != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(activity, PERMISSIONS_LOCATION, REQUEST_LOCATION);
+        }
+    }
+
     public static void verifyStoragePermissions(Activity activity)
     {
         // Check if we have write permission
@@ -373,11 +423,14 @@ public class MainActivity extends Activity {
     public void setButtonsClickable(boolean focus)
     {
 
+        bouton_capture_instantane.setClickable(focus);
+//        bouton_capture_instantane.setEnabled(focus);
         bouton_capture_5s.setClickable(focus);
-        bouton_capture_5s.setClickable(focus);
-        bouton_capture_5s.setClickable(focus);
-        bouton_capture_5s.setClickable(focus);
-        bouton_capture_5s.setClickable(focus);
+//        bouton_capture_5s.setEnabled(focus);
+        bouton_capture_10s.setClickable(focus);
+//        bouton_capture_10s.setEnabled(focus);
+        bouton_estimer_lieu.setClickable(focus);
+//        bouton_estimer_lieu.setEnabled(focus);
     }
 
     @Override
