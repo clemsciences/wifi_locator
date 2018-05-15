@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,10 +15,10 @@ import java.util.List;
  */
 
 public class Fingerprint {
-    private List<BeaconMeasure> lbm;
+    public List<BeaconMeasure> lbm = new ArrayList<>();
     private String location = "";
     JSONObject object = new JSONObject();
-    long timestamp;
+    private long timestamp;
     private static final String TAG = Fingerprint.class.getSimpleName();
 
 
@@ -31,6 +32,7 @@ public class Fingerprint {
         for(ScanResult sr : lsr)
         {
             bm = new BeaconMeasure(sr.SSID, sr.BSSID, sr.capabilities, sr.frequency, sr.level, sr.timestamp);
+            lbm.add(bm);
         }
         this.timestamp = timestamp;
 

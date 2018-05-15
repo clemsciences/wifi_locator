@@ -35,10 +35,30 @@ public class FingerprintManager {
     {
 
     }
-    public void findNearestFingerprint()
+
+    public String findNearestBeacon(Fingerprint fp)
     {
+        if(fp.lbm.size() > 0) {
+            BeaconMeasure nearestBeaconMeasure = fp.lbm.get(0);
+            for (BeaconMeasure bm : fp.lbm) {
+                if (nearestBeaconMeasure.getLevel() < bm.getLevel()) {
+                    nearestBeaconMeasure = bm;
+                }
+
+            }
+            return nearestBeaconMeasure.getSsid();
+        }
+        else
+        {
+            return "No beacon detected";
+        }
 
     }
+//    public void findNearestFingerprint()
+//
+//    {
+//
+//    }
 
     public void storeFingerprints(Fingerprint fp)
     {
