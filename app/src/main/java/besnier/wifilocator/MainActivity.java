@@ -11,9 +11,7 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Environment;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -34,11 +32,8 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 public class MainActivity extends Activity {
     Button bouton_capture_instantane;
@@ -57,8 +52,9 @@ public class MainActivity extends Activity {
 
 
     WifiManager wm;
+    FingerprintManager fpm;
     String FILENAME = "wifi_data";
-    String JSON_EXTENSION = ".json";
+
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int REQUEST_EXTERNAL_STORAGE = 1;
@@ -76,6 +72,9 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fpm = new FingerprintManager(FILENAME);
+
         wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         bouton_capture_instantane = findViewById(R.id.bouton_capture_instantane);
         bouton_capture_5s = findViewById(R.id.bouton_capture_5s);
@@ -89,7 +88,7 @@ public class MainActivity extends Activity {
         verifyStoragePermissions( MainActivity.this);
         verifyLocationPermissions(MainActivity.this);
 
-        // Activer le WEIFI
+        // Activate WIFI
 
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Wifi");
@@ -166,14 +165,11 @@ public class MainActivity extends Activity {
 
     public void scan_wifi_signals(final long duration)
     {
-
-
         if(duration == 0)
         {
             store_capture(wm.getScanResults());
         }
         else {
-
 
             measuring = true;
             Runnable r = new Runnable() {
@@ -202,198 +198,39 @@ public class MainActivity extends Activity {
             };
 
         Thread t = new Thread(r);
-
         t.start();
-
         }
     }
 
-    public JSONObject from_scan_result_to_json(List<ScanResult> lsr) throws JSONException {
-        Date currentTime = Calendar.getInstance().getTime();
-        JSONObject element;
-        JSONArray json_array;
-        JSONObject object;
-        int i = 0;
-        element = new JSONObject();
-        json_array = new JSONArray();
-        for (ScanResult sr : lsr) {
-            Log.d(TAG, "SSID : " + sr.SSID);
-            Log.d(TAG, "BSSID : " + sr.BSSID);
-            Log.d(TAG, "capabilities : " + sr.capabilities);
-            Log.d(TAG, "frequency : " + sr.frequency);
-            Log.d(TAG, "level : " + sr.level );
-            try {
-                object = new JSONObject();
-                object.put("ssid", sr.SSID);
-                object.put("bssid", sr.BSSID);
-                object.put("capabilities", sr.capabilities);
-                object.put("frequency", sr.frequency);
-                object.put("level", sr.level);
-                object.put("timestamp", currentTime.toString());
+    public JSONObject from_scan_result_to_json(List<ScanResult> lsr, String location) throws JSONException {
 
+        long timestamp = Calendar.getInstance().getTimeInMillis();
+        Fingerprint fp = new Fingerprint(lsr, entree_lieu.getText().toString(), timestamp);
+        return fp.toJSON();
 
-                json_array.put(i, object);
-                i++;
-            } catch (JSONException e) {
-                if (BuildConfig.DEBUG)
-                    Log.e(TAG, "Problème avec les données JSON");
-            }
-        }
-        element.put("fingerprint", json_array);
-        String lieu = entree_lieu.getText().toString();
-        if(lieu.equals(""))
-        {
-            element.put("location", "NOWHERE");
-        }
-        else
-        {
-            element.put("location", lieu);
-        }
-        Log.d(TAG, json_array.toString());
-        return element;
     }
 
     public void store_capture(List<ScanResult> lsr)
     {
-
-        Date currentTime = Calendar.getInstance().getTime();
-        FileOutputStream fos = null;
-        OutputStreamWriter osw = null;
-        JSONObject element = new JSONObject();
-        // converting
-        try {
-            element = from_scan_result_to_json(lsr);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
-        // storing
-        try {
-            File dirPublicDocuments =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-            if (!dirPublicDocuments.mkdirs()) {
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "tous les sous-dossiers" + dirPublicDocuments.getAbsolutePath() +
-                            " existent déjà");
-                }
-            }
-            if (BuildConfig.DEBUG)
-                Log.d(TAG, dirPublicDocuments.toString());
-
-            File json_file = new File(dirPublicDocuments, FILENAME + currentTime.toString() + JSON_EXTENSION);
-            fos = new FileOutputStream(json_file);
-            osw = new OutputStreamWriter(fos);
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, element.toString());
-                Log.d(TAG, osw.toString());
-            }
-
-            osw.write(element.toString());
-        } catch (FileNotFoundException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, "new FileOutputStream()", e);
-        } catch (IOException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, "problème io");
-        } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, "osw.close()", e);
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, "fos.close()", e);
-                }
-            }
-        }
-
+        long timestamp = Calendar.getInstance().getTimeInMillis();
+        Fingerprint fp = new Fingerprint(lsr, entree_lieu.getText().toString(), timestamp);
+        fpm.storeFingerprints(fp);
     }
 
     public void store_capture_lists(List<List<ScanResult>> llsr)
     {
-        Date currentTime = Calendar.getInstance().getTime();
-        FileOutputStream fos = null;
-        OutputStreamWriter osw = null;
-        JSONArray l_array;
-        JSONObject json_array = new JSONObject();
-        int j = 0;
-        l_array = new JSONArray();
-        // converting
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+
+        ArrayList<Fingerprint> lfp = new ArrayList<>();
+        Fingerprint fp;
         if (BuildConfig.DEBUG)
             Log.d(TAG, "store list capture");
         for(List<ScanResult> lsr: llsr)
         {
-            try {
-                json_array = from_scan_result_to_json(lsr);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "j : " + j);
-                Log.d(TAG, json_array.toString());
-            }
-
-            try {
-                l_array.put(j, json_array);
-            } catch (JSONException e) {
-                if (BuildConfig.DEBUG)
-                    Log.e(TAG, "Problème avec les données JSON");
-            }
-            j++;
+            fp = new Fingerprint(lsr, entree_lieu.getText().toString(), currentTime);
+            lfp.add(fp);
         }
-
-        // storing
-        try {
-            File dirPublicDocuments =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-            if (!dirPublicDocuments.mkdirs()) {
-                if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "tous les sous-dossiers" + dirPublicDocuments.getAbsolutePath() +
-                            " existent déjà");
-                }
-            }
-            if (BuildConfig.DEBUG)
-                Log.d(TAG, dirPublicDocuments.toString());
-
-            File json_file = new File(dirPublicDocuments, FILENAME + currentTime.toString() + JSON_EXTENSION);
-            fos = new FileOutputStream(json_file);
-            osw = new OutputStreamWriter(fos);
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, l_array.toString());
-            }
-            osw.write(l_array.toString());
-        } catch (FileNotFoundException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, "new FileOutputStream()", e);
-        } catch (IOException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, "problème io");
-        } finally {
-            if (osw != null) {
-                try {
-                    osw.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, "osw.close()", e);
-                }
-            }
-            if (fos != null) {
-                try {
-                    fos.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, "fos.close()", e);
-                }
-            }
-        }
-
+        fpm.storeFingerprints(lfp);
     }
 
     public static void verifyLocationPermissions(Activity activity)
