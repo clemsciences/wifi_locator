@@ -49,7 +49,7 @@ public class Fingerprint {
         {
             try {
                 bm.toJSON();
-                json_array.put(i, bm);
+                json_array.put(i, bm.toJSON());
                 i++;
             } catch (JSONException e) {
                 if (BuildConfig.DEBUG)
@@ -77,16 +77,3 @@ public class Fingerprint {
 
     }
 }
-
-
-//
-//                json_array.put(i, object);
-//                        i++;
-
-
-
-//            Log.d(TAG, "SSID : " + bm.getSsid());
-//                    Log.d(TAG, "BSSID : " + bm.getBssid());
-//                    Log.d(TAG, "capabilities : " + bm.getCapabilities());
-//                    Log.d(TAG, "frequency : " + bm.getFrequency());
-//                    Log.d(TAG, "level : " + bm.getLevel());

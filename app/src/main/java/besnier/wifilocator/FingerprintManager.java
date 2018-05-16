@@ -3,8 +3,6 @@ package besnier.wifilocator;
 import android.os.Environment;
 import android.util.Log;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -36,6 +34,10 @@ public class FingerprintManager {
 
     }
 
+    /**
+     * @param fp
+     * @return
+     */
     public String findNearestBeacon(Fingerprint fp)
     {
         if(fp.lbm.size() > 0) {
