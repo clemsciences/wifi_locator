@@ -3,120 +3,37 @@ package besnier.wifilocator;
 import android.os.Environment;
 import android.util.Log;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 /**
- * Created by clement_besnier on 15/05/2018.
+ * Created by clement_besnier on 18/05/2018.
  */
 
-public class FingerprintManager {
+public class AnnotatedFingerprintManager {
+
     private static final String TAG = FingerprintManager.class.getSimpleName();
     private String filename;
     String JSON_EXTENSION = ".json";
 
 
-    public FingerprintManager(String filename)
+    public AnnotatedFingerprintManager(String filename)
     {
         this.filename = filename;
     }
 
-    static public Fingerprint loadFingerprints(String filename)
+    public void loadAnnotatedFingerprints()
     {
 
-        Fingerprint fp_res = new Fingerprint();
-
-        File dirPublicDocuments =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-
-        File file = new File(dirPublicDocuments.toString(), filename.split(":")[1]); //.split(":")[1].split("/")[1]
-    //                    File file = new File(uri.getPath()); //.split(":")[1].split("/")[1]
-    //                    Log.d(TAG, uriString.split(":")[0]);
-    //                    Log.d(TAG, uriString.split(":")[1]);
-    //                    myFile.getPath();
-    //                    myFile.getAbsolutePath();
-    //                    myFile.get
-    //                    myFile.getPath()
-        String path = file.getAbsolutePath();
-
-
-        StringBuilder sb = new StringBuilder();
-        FileInputStream fis = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
-        try {
-            fis = new FileInputStream(file);
-            isr = new InputStreamReader(fis);
-            br = new BufferedReader(isr);
-            String resultat;
-            while ((resultat = br.readLine()) != null) {
-                if (sb.length() > 0) {
-                    sb.append("\n");
-                }
-                sb.append(resultat);
-            }
-        } catch (IOException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, e.toString());
-        } finally
-        {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            if (isr != null) {
-                try {
-                    isr.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            try
-            {
-                JSONObject object = new JSONObject(sb.toString());
-
-                if(BuildConfig.DEBUG)
-                {
-                    Log.d(TAG, object.toString());
-                }
-
-                fp_res.fromJSON(object);
-            }
-            catch (JSONException e)
-            {
-                if(BuildConfig.DEBUG)
-                    Log.e(TAG, e.toString());
-            }
-        }
-        return fp_res;
     }
-
-
 
     /**
      * @param lafp list ot annotated fingerprints

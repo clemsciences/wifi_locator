@@ -5,9 +5,6 @@ import android.net.wifi.ScanResult;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Calendar;
-import java.util.Date;
-
 /**
  * Created by clement_besnier on 15/05/2018.
  */
@@ -131,24 +128,36 @@ public class BeaconMeasure {
             }
         }
     }
-    public JSONObject toJSON()
-    {
-        JSONObject object = new JSONObject();
 
-        try {
-            object.put("ssid", ssid);
-            object.put("bssid", bssid);
-            object.put("capabilities", capabilities);
-            object.put("frequency", frequency);
-            object.put("level", level);
-            object.put("timestamp", timestamp);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+    public void fromJSON(JSONObject object) throws JSONException {
+
+        if(object.has("ssid"))
+            ssid = object.getString("ssid");
+        if (object.has("bssid"))
+            bssid = object.getString("bssid");
+        if (object.has("capabilities"))
+            capabilities = object.getString("capabilities");
+        if (object.has("frequency"))
+            frequency = object.getInt("frequency");
+        if (object.has("level"))
+            level = object.getLong("level");
+        if (object.has("timestamp"))
+            timestamp = object.getLong("timestamp");
+    }
+
+    public JSONObject toJSON() throws JSONException {
+
+        JSONObject object = new JSONObject();
+        object.put("ssid", ssid);
+        object.put("bssid", bssid);
+        object.put("capabilities", capabilities);
+        object.put("frequency", frequency);
+        object.put("level", level);
+        object.put("timestamp", timestamp);
         return object;
     }
-    public JSONObject toJSON(ScanResult sr, long timestamp)
-    {
+
+    public JSONObject toJSON(ScanResult sr, long timestamp) throws JSONException {
         ssid = sr.SSID;
         bssid = sr.SSID;
         capabilities = sr.SSID;

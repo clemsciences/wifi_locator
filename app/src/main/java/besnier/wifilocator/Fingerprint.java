@@ -17,9 +17,9 @@ import java.util.List;
 public class Fingerprint {
     public List<BeaconMeasure> lbm = new ArrayList<>();
     private String location = "";
-    JSONObject object = new JSONObject();
-    private long timestamp;
+    private long timestamp = 0;
     private static final String TAG = Fingerprint.class.getSimpleName();
+    public ArrayList<Long> vectorizedMeasure = new ArrayList<>();
 
 
 
@@ -35,6 +35,22 @@ public class Fingerprint {
             lbm.add(bm);
         }
         this.timestamp = timestamp;
+    }
+    public Fingerprint()
+    {
+    }
+
+    public void fromJSON(JSONObject json_object) throws JSONException {
+        if(json_object.has("location"))
+        {
+            location = json_object.getString("location");
+        }
+        if(json_object.has("fingerprint"))
+        {
+            JSONArray fingerprint = json_object.getJSONArray("fingerprint");
+
+
+        }
 
 
 
@@ -75,5 +91,46 @@ public class Fingerprint {
         Log.d(TAG, json_array.toString());
         return element;
 
+    }
+
+    public void vectorizeMeasure(VectorizedBeacons vb)
+    {
+        boolean found = false;
+        for(String bssid : vb.vect_bssid)
+        {
+            for(BeaconMeasure bm : lbm)
+            {
+                if (bm.getBssid().equals(bssid))
+                {
+                    vectorizedMeasure.add(bm.getLevel());
+                    found = true;
+                    break;
+                }
+            }
+            if (!found)
+            {
+                vectorizedMeasure.add((long) 0);
+            }
+
+        }
+
+    }
+
+    public long distanceVectorizedMeasure(Fingerprint other_fp)
+    {
+        if(other_fp.vectorizedMeasure.size() == vectorizedMeasure.size())
+        {
+            int i;
+            long distance = 0;
+            for(i = 0; i < vectorizedMeasure.size();i++)
+            {
+                distance = Math.abs(vectorizedMeasure.get(i) - other_fp.vectorizedMeasure.get(i));
+            }
+            return distance;
+        }
+        else
+        {
+            throw new UnsupportedOperationException();
+        }
     }
 }

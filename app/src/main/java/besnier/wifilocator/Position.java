@@ -7,13 +7,13 @@ package besnier.wifilocator;
 public class Position {
     float x, y, z;
 
-    Position(float x, float y, float z)
+    public Position(float x, float y, float z)
     {
         this.x = x;
         this.y = y;
         this.z = z;
     }
-    Position(float x, float y)
+    private Position(float x, float y)
     {
         new Position(x, y, 0);
     }
