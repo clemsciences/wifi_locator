@@ -6,12 +6,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,6 +19,7 @@ import android.widget.EditText;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -33,8 +32,9 @@ public class MainActivity extends Activity {
     private Button bouton_estimer_position;
 
     private EditText entree_lieu;
-    private EditText texte_lieu_estimation;
-    private EditText texte_position_estimation;
+    private EditText entree_lieu_estimation;
+    private EditText entree_position_estimation;
+    private EditText entree_prefix;
 
 
     private volatile boolean measuring;
@@ -66,7 +66,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+//        final DBManager dbm = new DBManager(MainActivity.this);
         fpm = new FingerprintManager(FILENAME);
 
         wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -77,12 +77,13 @@ public class MainActivity extends Activity {
         bouton_estimer_position = (Button) findViewById(R.id.bouton_estimer_position);
 
         entree_lieu = (EditText) findViewById(R.id.entree_lieu);
-        texte_lieu_estimation = (EditText) findViewById(R.id.texte_lieu_estimation);
-        texte_position_estimation = (EditText) findViewById(R.id.texte_position_estimation);
+        entree_lieu_estimation = (EditText) findViewById(R.id.texte_lieu_estimation);
+        entree_position_estimation = (EditText) findViewById(R.id.texte_position_estimation);
+        entree_prefix = (EditText) findViewById(R.id.entree_prefix);
 
 
-        verifyStoragePermissions( MainActivity.this);
-        verifyLocationPermissions(MainActivity.this);
+//        verifyStoragePermissions( MainActivity.this);
+//        verifyLocationPermissions(MainActivity.this);
 
         // Activate WIFI
 
@@ -144,7 +145,8 @@ public class MainActivity extends Activity {
         bouton_capture_10s.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "on a cliqué !");
+                Log.d(TAG,
+                        "on a cliqué !");
                 scan_wifi_signals(10000);
             }
         });
@@ -158,7 +160,7 @@ public class MainActivity extends Activity {
                 Fingerprint fp = new Fingerprint(wm.getScanResults(), entree_lieu.getText().toString(), timestamp);
                 String nearestSSID = fpm.findNearestBeacon(fp);
                 Log.d(TAG, "info : "+fp.toJSON());
-                texte_lieu_estimation.setText(nearestSSID);
+                entree_lieu_estimation.setText(nearestSSID);
             }
         });
 
@@ -167,8 +169,14 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 long timestamp = Calendar.getInstance().getTimeInMillis();
                 Fingerprint fp = new Fingerprint(wm.getScanResults(), entree_lieu.getText().toString(), timestamp);
-//                fpm.loadFingerprints("hehe");
-//                Position pos = fpm.estimatePosition();
+
+                String prefix = entree_prefix.getText().toString();
+
+
+                ArrayList<AnnotatedFingerprint> lafp = FingerprintManager.loadAnnotatedFingerprints(new File(getFilesDir(), prefix));
+                VectorizedBeacons vb = new VectorizedBeacons(lafp);
+                Position pos = fpm.estimatePosition(lafp, fp, vb);
+                entree_position_estimation.setText(pos.toString());
             }
         });
     }
@@ -224,7 +232,8 @@ public class MainActivity extends Activity {
     {
         long timestamp = Calendar.getInstance().getTimeInMillis();
         Fingerprint fp = new Fingerprint(lsr, entree_lieu.getText().toString(), timestamp);
-        fpm.storeFingerprints(fp);
+        File f = new File(getFilesDir(), entree_prefix.getText().toString());
+        fpm.storeFingerprints(fp, f);
     }
 
     private void store_capture_lists(List<List<ScanResult>> llsr)
@@ -240,32 +249,33 @@ public class MainActivity extends Activity {
             fp = new Fingerprint(lsr, entree_lieu.getText().toString(), currentTime);
             lfp.add(fp);
         }
-        fpm.storeFingerprints(lfp);
+        File file = new File(getFilesDir(), entree_prefix.getText().toString());
+        fpm.storeFingerprints(lfp,file);
     }
 
-    private static void verifyLocationPermissions(Activity activity)
-    {
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
-        if( permission != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(activity, PERMISSIONS_LOCATION, REQUEST_LOCATION);
-        }
-    }
+//    private static void verifyLocationPermissions(Activity activity)
+//    {
+//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
+//        if( permission != PackageManager.PERMISSION_GRANTED)
+//        {
+//            ActivityCompat.requestPermissions(activity, PERMISSIONS_LOCATION, REQUEST_LOCATION);
+//        }
+//    }
 
-    private static void verifyStoragePermissions(Activity activity)
-    {
-        // Check if we have write permission
-        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    activity,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
-    }
+//    private static void verifyStoragePermissions(Activity activity)
+//    {
+//        // Check if we have write permission
+//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+//
+//        if (permission != PackageManager.PERMISSION_GRANTED) {
+//            // We don't have permission so prompt the user
+//            ActivityCompat.requestPermissions(
+//                    activity,
+//                    PERMISSIONS_STORAGE,
+//                    REQUEST_EXTERNAL_STORAGE
+//            );
+//        }
+//    }
 
     private void setButtonsClickable(boolean focus)
     {
