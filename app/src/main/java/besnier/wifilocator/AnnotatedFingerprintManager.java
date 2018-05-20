@@ -35,49 +35,49 @@ public class AnnotatedFingerprintManager {
 
     }
 
-    /**
-     * @param lafp list ot annotated fingerprints
-     * @param fp fingerprint currently measured
-     * @param vb the way beacon signal power may be compared
-     * @return res_pos = \frac{\sum_{i=1}^{n} \frac{d_i}{\abs(r - f_i}}{\sum_{i=1}^{n} \frac{1}{\abs{r - f_i}}}
-     */
-    public Position estimatePosition(List<AnnotatedFingerprint> lafp, Fingerprint fp, VectorizedBeacons vb)
-    {
-        fp.vectorizeMeasure(vb);
-        long distance;
-        long overdistance;
-        long coefficient = 0;
-        Position res_pos = new Position(0, 0, 0);
-        for (AnnotatedFingerprint afp : lafp)
-        {
-            res_pos.add(afp.pos);
-            afp.vectorizeMeasure(vb);
-            distance = afp.distanceVectorizedMeasure(fp);
-            overdistance = 1/distance;
-            res_pos.multiply_scalar(overdistance);
-            coefficient += overdistance;
-
-        }
-        res_pos.multiply_scalar(1/coefficient);
-        return res_pos;
-    }
-
-    public String findNearestBeacon(Fingerprint fp)
-    {
-        if(fp.lbm.size() > 0) {
-            BeaconMeasure nearestBeaconMeasure = fp.lbm.get(0);
-            for (BeaconMeasure bm : fp.lbm) {
-                if (nearestBeaconMeasure.getLevel() < bm.getLevel()) {
-                    nearestBeaconMeasure = bm;
-                }
-            }
-            return nearestBeaconMeasure.getSsid();
-        }
-        else
-        {
-            return "No beacon detected";
-        }
-    }
+//    /**
+//     * @param lafp list ot annotated fingerprints
+//     * @param fp fingerprint currently measured
+//     * @param vb the way beacon signal power may be compared
+//     * @return res_pos = \frac{\sum_{i=1}^{n} \frac{d_i}{\abs(r - f_i}}{\sum_{i=1}^{n} \frac{1}{\abs{r - f_i}}}
+//     */
+//    public Position estimatePosition(List<AnnotatedFingerprint> lafp, Fingerprint fp, VectorizedBeacons vb)
+//    {
+//        fp.vectorizeMeasure(vb);
+//        long distance;
+//        long overdistance;
+//        long coefficient = 0;
+//        Position res_pos = new Position(0, 0, 0);
+//        for (AnnotatedFingerprint afp : lafp)
+//        {
+//            res_pos.add(afp.pos);
+//            afp.vectorizeMeasure(vb);
+//            distance = afp.distanceVectorizedMeasure(fp);
+//            overdistance = 1/distance;
+//            res_pos.multiply_scalar(overdistance);
+//            coefficient += overdistance;
+//
+//        }
+//        res_pos.multiply_scalar(1/coefficient);
+//        return res_pos;
+//    }
+//
+//    public String findNearestBeacon(AnnotatedFingerprint afp)
+//    {
+//        if(afp.lbm.size() > 0) {
+//            BeaconMeasure nearestBeaconMeasure = afp.lbm.get(0);
+//            for (BeaconMeasure bm : afp.lbm) {
+//                if (nearestBeaconMeasure.getLevel() < bm.getLevel()) {
+//                    nearestBeaconMeasure = bm;
+//                }
+//            }
+//            return nearestBeaconMeasure.getSsid();
+//        }
+//        else
+//        {
+//            return "No beacon detected";
+//        }
+//    }
 
     public void storeFingerprints(Fingerprint fp)
     {

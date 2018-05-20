@@ -27,7 +27,18 @@ public class VectorizedBeacons {
             }
         }
         vect_bssid.addAll(set_bssid);
+    }
 
+    public VectorizedBeacons(ArrayList<AnnotatedFingerprint> lafp) {
+        Set<String> set_bssid = new HashSet<>();
+        for(AnnotatedFingerprint afp : lafp)
+        {
+            for(BeaconMeasure bm : afp.lbm)
+            {
+                set_bssid.add(bm.getBssid());
+            }
+        }
+        vect_bssid.addAll(set_bssid);
     }
 
     public JSONArray toJSON()

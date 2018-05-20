@@ -7,6 +7,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,13 +48,15 @@ public class Fingerprint {
         }
         if(json_object.has("fingerprint"))
         {
-            JSONArray fingerprint = json_object.getJSONArray("fingerprint");
-
-
+            ArrayList<BeaconMeasure> transi_lbm = new ArrayList<>();
+            JSONArray fingerprint_json = json_object.getJSONArray("fingerprint");
+            for(int i = 0 ; i < fingerprint_json.length(); i ++)
+            {
+                BeaconMeasure bm = new BeaconMeasure((JSONObject) fingerprint_json.get(i));
+                transi_lbm.add(bm);
+            }
+            lbm = transi_lbm;
         }
-
-
-
     }
 
     public JSONObject toJSON()
@@ -93,6 +96,75 @@ public class Fingerprint {
 
     }
 
+
+    public void load(File file)
+    {
+        if(file.isFile())
+        {
+            StringBuilder sb = new StringBuilder();
+            FileInputStream fis = null;
+            InputStreamReader isr = null;
+            BufferedReader br = null;
+            try {
+                fis = new FileInputStream(file);
+                isr = new InputStreamReader(fis);
+                br = new BufferedReader(isr);
+                String resultat;
+                while ((resultat = br.readLine()) != null) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(resultat);
+                }
+            } catch (IOException e) {
+                if (BuildConfig.DEBUG)
+                    Log.e(TAG, e.toString());
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+                if (isr != null) {
+                    try {
+                        isr.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+            }
+
+            try
+            {
+                JSONObject object = new JSONObject(sb.toString());
+
+                if(BuildConfig.DEBUG)
+                {
+                    Log.d(TAG, object.toString());
+                }
+
+                fromJSON(object);
+            }
+            catch (JSONException e)
+            {
+                if(BuildConfig.DEBUG)
+                    Log.e(TAG, e.toString());
+            }
+        }
+    }
+
     public void vectorizeMeasure(VectorizedBeacons vb)
     {
         boolean found = false;
@@ -130,6 +202,7 @@ public class Fingerprint {
         }
         else
         {
+            Log.d(TAG, vectorizedMeasure.size()+ " : "+other_fp.vectorizedMeasure.size());
             throw new UnsupportedOperationException();
         }
     }

@@ -1,5 +1,6 @@
 package besnier.wifilocator;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -14,6 +15,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -33,87 +36,41 @@ public class FingerprintManager {
         this.filename = filename;
     }
 
-    static public Fingerprint loadFingerprints(String filename)
+
+    static public ArrayList<Fingerprint> loadFingerprints(File folder)
     {
+        ArrayList<Fingerprint> lfp = new ArrayList<>();
+        if(folder.isDirectory()) {
 
-        Fingerprint fp_res = new Fingerprint();
-
-        File dirPublicDocuments =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-
-        File file = new File(dirPublicDocuments.toString(), filename.split(":")[1]); //.split(":")[1].split("/")[1]
-    //                    File file = new File(uri.getPath()); //.split(":")[1].split("/")[1]
-    //                    Log.d(TAG, uriString.split(":")[0]);
-    //                    Log.d(TAG, uriString.split(":")[1]);
-    //                    myFile.getPath();
-    //                    myFile.getAbsolutePath();
-    //                    myFile.get
-    //                    myFile.getPath()
-        String path = file.getAbsolutePath();
-
-
-        StringBuilder sb = new StringBuilder();
-        FileInputStream fis = null;
-        InputStreamReader isr = null;
-        BufferedReader br = null;
-        try {
-            fis = new FileInputStream(file);
-            isr = new InputStreamReader(fis);
-            br = new BufferedReader(isr);
-            String resultat;
-            while ((resultat = br.readLine()) != null) {
-                if (sb.length() > 0) {
-                    sb.append("\n");
-                }
-                sb.append(resultat);
-            }
-        } catch (IOException e) {
-            if (BuildConfig.DEBUG)
-                Log.e(TAG, e.toString());
-        } finally
-        {
-            if (br != null) {
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            if (isr != null) {
-                try {
-                    isr.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            if (fis != null) {
-                try {
-                    fis.close();
-                } catch (IOException e) {
-                    if (BuildConfig.DEBUG)
-                        Log.e(TAG, e.toString());
-                }
-            }
-            try
-            {
-                JSONObject object = new JSONObject(sb.toString());
-
-                if(BuildConfig.DEBUG)
-                {
-                    Log.d(TAG, object.toString());
-                }
-
-                fp_res.fromJSON(object);
-            }
-            catch (JSONException e)
-            {
-                if(BuildConfig.DEBUG)
-                    Log.e(TAG, e.toString());
+            for (File f : folder.listFiles()) {
+                Fingerprint fp = new Fingerprint();
+                fp.load(f);
+                lfp.add(fp);
             }
         }
-        return fp_res;
+        return lfp;
+    }
+
+    static public ArrayList<AnnotatedFingerprint> loadAnnotatedFingerprints(File folder)
+    {
+        ArrayList<AnnotatedFingerprint> lafp = new ArrayList<>();
+        if(folder.isDirectory())
+        {
+            for(File f : folder.listFiles())
+            {
+                AnnotatedFingerprint afp = new AnnotatedFingerprint();
+                afp.load(f);
+                lafp.add(afp);
+            }
+        }
+        return lafp;
+    }
+
+    static public Fingerprint loadFingerprint(File file)
+    {
+        Fingerprint fp = new Fingerprint();
+        fp.load(file);
+        return fp;
     }
 
 
@@ -162,7 +119,7 @@ public class FingerprintManager {
         }
     }
 
-    public void storeFingerprints(Fingerprint fp)
+    public void storeFingerprints(Fingerprint fp, File prefix_file)
     {
         FileOutputStream fos = null;
         OutputStreamWriter osw = null;
@@ -170,18 +127,19 @@ public class FingerprintManager {
 
         // storing
         try {
-            File dirPublicDocuments =
-                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
-            if (!dirPublicDocuments.mkdirs()) {
+//            File dirPublicDocuments =
+//                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+
+            if (!prefix_file.mkdirs()) {
                 if (BuildConfig.DEBUG) {
-                    Log.d(TAG, "tous les sous-dossiers" + dirPublicDocuments.getAbsolutePath() +
+                    Log.d(TAG, "tous les sous-dossiers" + prefix_file.getAbsolutePath() +
                             " existent déjà");
                 }
             }
             if (BuildConfig.DEBUG)
-                Log.d(TAG, dirPublicDocuments.toString());
+                Log.d(TAG, prefix_file.toString());
             Date currentTime = Calendar.getInstance().getTime();
-            File json_file = new File(dirPublicDocuments, filename + currentTime.toString() + JSON_EXTENSION);
+            File json_file = new File(prefix_file, filename + currentTime.toString() + JSON_EXTENSION);
             fos = new FileOutputStream(json_file);
             osw = new OutputStreamWriter(fos);
             if (BuildConfig.DEBUG) {
@@ -216,11 +174,11 @@ public class FingerprintManager {
         }
     }
 
-    public void storeFingerprints(List<Fingerprint> lfp)
+    public void storeFingerprints(List<Fingerprint> lfp, File prefix)
     {
         for(Fingerprint fp: lfp)
         {
-            storeFingerprints(fp);
+            storeFingerprints(fp, prefix);
         }
     }
 }
