@@ -50,4 +50,14 @@ public class VectorizedBeacons {
         }
         return json_array;
     }
+
+    public String toString()
+    {
+        String res = "";
+        for(String a : vect_bssid)
+        {
+            res = res + ", " + a;
+        }
+        return res;
+    }
 }

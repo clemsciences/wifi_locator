@@ -167,22 +167,24 @@ public class Fingerprint {
 
     public void vectorizeMeasure(VectorizedBeacons vb)
     {
-        boolean found = false;
+        boolean found;
         for(String bssid : vb.vect_bssid)
         {
+            found = false;
             for(BeaconMeasure bm : lbm)
             {
                 if (bm.getBssid().equals(bssid))
                 {
                     vectorizedMeasure.add(bm.getLevel());
                     found = true;
-                    break;
+
                 }
             }
             if (!found)
             {
                 vectorizedMeasure.add((long) 0);
             }
+
 
         }
 
@@ -202,8 +204,16 @@ public class Fingerprint {
         }
         else
         {
-            Log.d(TAG, vectorizedMeasure.size()+ " : "+other_fp.vectorizedMeasure.size());
+            Log.d(TAG, "taille 1 : " + vectorizedMeasure.size()+ " , taille 2 : "+other_fp.vectorizedMeasure.size());
             throw new UnsupportedOperationException();
         }
+    }
+
+    public String toStringvectorizedMeasure() {
+        String res = "";
+        for (long a : vectorizedMeasure) {
+            res = res + ", " + a;
+        }
+        return res;
     }
 }

@@ -18,7 +18,6 @@ public class AnnotatedFingerprint extends Fingerprint {
         super(lsr, location, timestamp);
         this.pos = pos;
 
-
     }
 
     public AnnotatedFingerprint()

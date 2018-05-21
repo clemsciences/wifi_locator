@@ -83,17 +83,28 @@ public class FingerprintManager {
      */
     public Position estimatePosition(List<AnnotatedFingerprint> lafp, Fingerprint fp, VectorizedBeacons vb)
     {
-        fp.vectorizeMeasure(vb);
         long distance;
         long overdistance;
         long coefficient = 0;
         Position res_pos = new Position(0, 0, 0);
+        fp.vectorizeMeasure(vb);
         for (AnnotatedFingerprint afp : lafp)
         {
             res_pos.add(afp.pos);
             afp.vectorizeMeasure(vb);
+//            Log.d(TAG, "vb afp : "+afp.vectorizedMeasure.toArray());
+//            Log.d(TAG, "vb fp : "+fp.vectorizedMeasure.toArray());
+            Log.d(TAG, "afp" + afp.toStringvectorizedMeasure());
+            Log.d(TAG, "fp" + fp.toStringvectorizedMeasure());
             distance = afp.distanceVectorizedMeasure(fp);
-            overdistance = 1/distance;
+            if(distance < 0.005)
+            {
+                overdistance = 0;
+            }
+            else
+            {
+                overdistance = 1/distance;
+            }
             res_pos.multiply_scalar(overdistance);
             coefficient += overdistance;
 
