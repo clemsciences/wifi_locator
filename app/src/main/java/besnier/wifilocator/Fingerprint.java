@@ -198,7 +198,7 @@ public class Fingerprint {
             long distance = 0;
             for(i = 0; i < vectorizedMeasure.size();i++)
             {
-                distance = Math.abs(vectorizedMeasure.get(i) - other_fp.vectorizedMeasure.get(i));
+                distance += Math.abs(vectorizedMeasure.get(i) - other_fp.vectorizedMeasure.get(i));
             }
             return distance;
         }

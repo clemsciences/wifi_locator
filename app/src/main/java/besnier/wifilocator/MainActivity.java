@@ -6,16 +6,20 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Settings;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONObject;
 
@@ -30,6 +34,7 @@ public class MainActivity extends Activity {
     private Button bouton_capture_10s;
     private Button bouton_estimer_lieu;
     private Button bouton_estimer_position;
+    private Button bouton_exporter;
 
     private EditText entree_lieu;
     private EditText entree_lieu_estimation;
@@ -75,6 +80,7 @@ public class MainActivity extends Activity {
         bouton_capture_10s = (Button) findViewById(R.id.bouton_capture_10s);
         bouton_estimer_lieu = (Button) findViewById(R.id.bouton_estimer_lieu);
         bouton_estimer_position = (Button) findViewById(R.id.bouton_estimer_position);
+        bouton_exporter = (Button) findViewById(R.id.bouton_exporter);
 
         entree_lieu = (EditText) findViewById(R.id.entree_lieu);
         entree_lieu_estimation = (EditText) findViewById(R.id.texte_lieu_estimation);
@@ -82,8 +88,8 @@ public class MainActivity extends Activity {
         entree_prefix = (EditText) findViewById(R.id.entree_prefix);
 
 
-//        verifyStoragePermissions( MainActivity.this);
-//        verifyLocationPermissions(MainActivity.this);
+        verifyStoragePermissions( MainActivity.this);
+        verifyLocationPermissions(MainActivity.this);
 
         // Activate WIFI
 
@@ -179,6 +185,42 @@ public class MainActivity extends Activity {
                 entree_position_estimation.setText(pos.toString());
             }
         });
+
+        final CharSequence exportation_success_text = "Données exportées dans le dossier Documents";
+        final CharSequence exportation_failure_no_prefix_text = "Il faut préciser un préfixe valide";
+        final CharSequence exportation_failure_unvalid_prefix_text = "Le préfixe donné n'est pas valide";
+
+        bouton_exporter.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Context context = getApplicationContext();
+
+                int duration = Toast.LENGTH_SHORT;
+
+                if(!entree_prefix.getText().toString().equals(""))
+                {
+                    File dirPublicDocuments =
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+
+                    File folder_to_copy = new File(getFilesDir(), entree_prefix.getText().toString());
+                    File new_folder = new File(dirPublicDocuments.toString(),entree_prefix.getText().toString());
+
+                    boolean success = FingerprintManager.exportFingerprints(folder_to_copy, new_folder);
+                    if(success) {
+                        Toast.makeText(context, exportation_success_text, duration).show();
+                    }
+                    else
+                    {
+                        Toast.makeText(context, "Problème dans l'exportation pour des raisons inconnues", duration).show();
+                    }
+
+                }
+                else
+                {
+                    Toast.makeText(context, exportation_failure_no_prefix_text, duration).show();
+                }
+            }
+        });
     }
 
     private void scan_wifi_signals(final long duration)
@@ -250,32 +292,32 @@ public class MainActivity extends Activity {
             lfp.add(fp);
         }
         File file = new File(getFilesDir(), entree_prefix.getText().toString());
-        fpm.storeFingerprints(lfp,file);
+        fpm.storeFingerprints(lfp, file);
     }
 
-//    private static void verifyLocationPermissions(Activity activity)
-//    {
-//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
-//        if( permission != PackageManager.PERMISSION_GRANTED)
-//        {
-//            ActivityCompat.requestPermissions(activity, PERMISSIONS_LOCATION, REQUEST_LOCATION);
-//        }
-//    }
+    private static void verifyLocationPermissions(Activity activity)
+    {
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION);
+        if( permission != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(activity, PERMISSIONS_LOCATION, REQUEST_LOCATION);
+        }
+    }
 
-//    private static void verifyStoragePermissions(Activity activity)
-//    {
-//        // Check if we have write permission
-//        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//
-//        if (permission != PackageManager.PERMISSION_GRANTED) {
-//            // We don't have permission so prompt the user
-//            ActivityCompat.requestPermissions(
-//                    activity,
-//                    PERMISSIONS_STORAGE,
-//                    REQUEST_EXTERNAL_STORAGE
-//            );
-//        }
-//    }
+    private static void verifyStoragePermissions(Activity activity)
+    {
+        // Check if we have write permission
+        int permission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
 
     private void setButtonsClickable(boolean focus)
     {
