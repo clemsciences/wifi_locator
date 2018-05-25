@@ -32,11 +32,13 @@ public class MainActivity extends Activity {
     private Button bouton_capture_instantane;
     private Button bouton_capture_5s;
     private Button bouton_capture_10s;
+    private Button bouton_balise_plus_proche;
     private Button bouton_estimer_lieu;
     private Button bouton_estimer_position;
     private Button bouton_exporter;
 
     private EditText entree_lieu;
+    private EditText entree_balise_plus_proche;
     private EditText entree_lieu_estimation;
     private EditText entree_position_estimation;
     private EditText entree_prefix;
@@ -78,13 +80,15 @@ public class MainActivity extends Activity {
         bouton_capture_instantane = (Button) findViewById(R.id.bouton_capture_instantane);
         bouton_capture_5s = (Button) findViewById(R.id.bouton_capture_5s);
         bouton_capture_10s = (Button) findViewById(R.id.bouton_capture_10s);
+        bouton_balise_plus_proche = (Button) findViewById(R.id.bouton_balise_plus_proche);
         bouton_estimer_lieu = (Button) findViewById(R.id.bouton_estimer_lieu);
         bouton_estimer_position = (Button) findViewById(R.id.bouton_estimer_position);
         bouton_exporter = (Button) findViewById(R.id.bouton_exporter);
 
         entree_lieu = (EditText) findViewById(R.id.entree_lieu);
-        entree_lieu_estimation = (EditText) findViewById(R.id.texte_lieu_estimation);
-        entree_position_estimation = (EditText) findViewById(R.id.texte_position_estimation);
+        entree_lieu_estimation = (EditText) findViewById(R.id.entree_lieu_estimation);
+        entree_balise_plus_proche = (EditText) findViewById(R.id.entree_balise_plus_proche);
+        entree_position_estimation = (EditText) findViewById(R.id.entree_position_estimation);
         entree_prefix = (EditText) findViewById(R.id.entree_prefix);
 
 
@@ -157,8 +161,7 @@ public class MainActivity extends Activity {
             }
         });
 
-
-        bouton_estimer_lieu.setOnClickListener(new View.OnClickListener() {
+        bouton_balise_plus_proche.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "on a cliqué !");
@@ -166,7 +169,21 @@ public class MainActivity extends Activity {
                 Fingerprint fp = new Fingerprint(wm.getScanResults(), entree_lieu.getText().toString(), timestamp);
                 String nearestSSID = fpm.findNearestBeacon(fp);
                 Log.d(TAG, "info : "+fp.toJSON());
-                entree_lieu_estimation.setText(nearestSSID);
+                entree_balise_plus_proche.setText(nearestSSID);
+            }
+        });
+
+
+        bouton_estimer_lieu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long timestamp = Calendar.getInstance().getTimeInMillis();
+                Fingerprint fp_now = new Fingerprint(wm.getScanResults(), "", timestamp);
+                String prefix = entree_prefix.getText().toString();
+                ArrayList<Fingerprint> lfp = FingerprintManager.loadFingerprints(new File(getFilesDir(), prefix));
+                VectorizedBeacons vb = new VectorizedBeacons(lfp);
+                fp_now.estimateLocation(lfp, vb);
+                entree_lieu_estimation.setText(fp_now.getLocation());
             }
         });
 

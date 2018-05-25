@@ -17,6 +17,7 @@ import java.util.List;
 
 public class Fingerprint {
     public List<BeaconMeasure> lbm = new ArrayList<>();
+
     private String location = "";
     private long timestamp = 0;
     private static final String TAG = Fingerprint.class.getSimpleName();
@@ -39,6 +40,35 @@ public class Fingerprint {
     }
     public Fingerprint()
     {
+    }
+
+    public void estimateLocation(List<Fingerprint> lfp, VectorizedBeacons vb)
+    {
+        long distance;
+        long mini_distance = Long.MAX_VALUE;
+        int i_mini_distance = 0;
+        int i = 0;
+        vectorizeMeasure(vb);
+        for(Fingerprint fp : lfp)
+        {
+            fp.vectorizeMeasure(vb);
+            distance = fp.distanceVectorizedMeasure(this);
+            if(distance < mini_distance)
+            {
+                mini_distance = distance;
+                i_mini_distance = i;
+            }
+            i ++;
+        }
+        location = lfp.get(i_mini_distance).getLocation();
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public void fromJSON(JSONObject json_object) throws JSONException {
@@ -189,6 +219,7 @@ public class Fingerprint {
         }
 
     }
+
 
     public long distanceVectorizedMeasure(Fingerprint other_fp)
     {

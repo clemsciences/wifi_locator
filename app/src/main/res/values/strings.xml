@@ -15,4 +15,5 @@
     <string name="bouton_estimer_position">Estimer la position</string>
     <string name="label_position_estimee">Position estimée</string>
     <string name="bouton_exporter">Exporter</string>
+    <string name="bouton_balise_plus_proche">Balise la plus proche</string>
 </resources>

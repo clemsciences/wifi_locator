@@ -209,6 +209,27 @@ public class FingerprintManager {
         res_pos.multiply_scalar(1/coefficient);
         return res_pos;
     }
+    public String estimateLocation(List<Fingerprint> lfp, Fingerprint fp_to_locate, VectorizedBeacons vb)
+    {
+        long distance;
+        long mini_distance = Long.MAX_VALUE;
+        int i_mini_distance = 0;
+        int i = 0;
+//        ArrayList<Long> distances = new ArrayList<>();
+        fp_to_locate.vectorizeMeasure(vb);
+        for(Fingerprint fp : lfp)
+        {
+            fp.vectorizeMeasure(vb);
+            distance = fp.distanceVectorizedMeasure(fp_to_locate);
+            if(distance < mini_distance)
+            {
+                mini_distance = distance;
+                i_mini_distance = i;
+            }
+            i ++;
+        }
+        return lfp.get(i_mini_distance).getLocation();
+    }
 
     public String findNearestBeacon(Fingerprint fp)
     {
