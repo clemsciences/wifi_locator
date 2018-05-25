@@ -36,6 +36,7 @@ public class MainActivity extends Activity {
     private Button bouton_estimer_lieu;
     private Button bouton_estimer_position;
     private Button bouton_exporter;
+    private Button bouton_importer;
 
     private EditText entree_lieu;
     private EditText entree_balise_plus_proche;
@@ -84,6 +85,7 @@ public class MainActivity extends Activity {
         bouton_estimer_lieu = (Button) findViewById(R.id.bouton_estimer_lieu);
         bouton_estimer_position = (Button) findViewById(R.id.bouton_estimer_position);
         bouton_exporter = (Button) findViewById(R.id.bouton_exporter);
+        bouton_importer = (Button) findViewById(R.id.bouton_importer);
 
         entree_lieu = (EditText) findViewById(R.id.entree_lieu);
         entree_lieu_estimation = (EditText) findViewById(R.id.entree_lieu_estimation);
@@ -238,7 +240,46 @@ public class MainActivity extends Activity {
                 }
             }
         });
+
+        bouton_importer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Context context = getApplicationContext();
+
+                int duration = Toast.LENGTH_SHORT;
+
+                if(!entree_prefix.getText().toString().equals("")) {
+                    File dirPublicDocuments =
+                            Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS);
+
+                    File folder_to_copy = new File(dirPublicDocuments.toString(), entree_prefix.getText().toString());
+                    if (folder_to_copy.isDirectory())
+                    {
+
+                        File new_folder = new File(getFilesDir(), entree_prefix.getText().toString());
+
+                        boolean success = FingerprintManager.exportFingerprints(folder_to_copy, new_folder);
+                        if (success) {
+                            Toast.makeText(context, exportation_success_text, duration).show();
+                        } else {
+                            Toast.makeText(context, "Problème dans l'importation pour des raisons inconnues", duration).show();
+                        }
+                    }
+                    else
+                    {
+                        Toast.makeText(context, "Problème dans l'importation dans les suppressions", duration).show();
+                    }
+                }
+                else
+                {
+                    Toast.makeText(context, exportation_failure_no_prefix_text, duration).show();
+                }
+            }
+        });
     }
+
+
 
     private void scan_wifi_signals(final long duration)
     {

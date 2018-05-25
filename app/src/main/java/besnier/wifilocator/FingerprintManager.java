@@ -170,6 +170,116 @@ public class FingerprintManager {
         return success;
     }
 
+    static public boolean importFingerprints(File folder_src, File folder_dst)
+    {
+        boolean success = true;
+
+        if(!folder_dst.mkdirs())
+        {
+            for(File f : folder_dst.listFiles())
+            {
+                boolean delete = f.delete();
+                if(!delete)
+                {
+                    Log.e(TAG, "problem with deleting files");
+                }
+            }
+            if(BuildConfig.DEBUG) {
+                Log.d(TAG, "tous les sous-dossiers" + folder_dst.getAbsolutePath() +
+                        " existent déjà et ont été supprimés");
+            }
+        }
+        Log.e(TAG, "chemin absolu : "+folder_src.getAbsolutePath());
+        Log.e(TAG, "chemin : "+folder_src.getPath());
+        Log.e(TAG, "Dossier ? : "+folder_src.isDirectory());
+        Log.e(TAG, folder_src.getAbsolutePath());
+        for(File f : folder_src.listFiles()) {
+            String filename = f.getName();
+            StringBuilder sb = new StringBuilder();
+            FileInputStream fis = null;
+            InputStreamReader isr = null;
+            BufferedReader br = null;
+            try {
+                fis = new FileInputStream(f);
+                isr = new InputStreamReader(fis);
+                br = new BufferedReader(isr);
+                String resultat;
+                while ((resultat = br.readLine()) != null) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(resultat);
+                }
+            } catch (IOException e) {
+                success = false;
+                if (BuildConfig.DEBUG)
+                    Log.e(TAG, e.toString());
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        success = false;
+                        if (BuildConfig.DEBUG) Log.e(TAG, e.toString());
+                    }
+                }
+                if (isr != null) {
+                    try {
+                        isr.close();
+                    } catch (IOException e) {
+                        success = false;
+                        if (BuildConfig.DEBUG) Log.e(TAG, e.toString());
+                    }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        success = false;
+                        if (BuildConfig.DEBUG) Log.e(TAG, e.toString());
+                    }
+                }
+            }
+
+            File copied_file = new File(folder_dst, filename);
+            FileOutputStream fos = null;
+            OutputStreamWriter osw = null;
+            try {
+                fos = new FileOutputStream(copied_file);
+
+                osw = new OutputStreamWriter(fos);
+                if (BuildConfig.DEBUG) {
+                    Log.d(TAG, sb.toString());
+                    Log.d(TAG, osw.toString());
+                }
+                osw.write(sb.toString());
+            } catch (IOException e) {
+                success = false;
+                e.printStackTrace();
+            } finally {
+                if (osw != null) {
+                    try {
+                        osw.close();
+                    } catch (IOException e) {
+                        success = false;
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, "osw.close()", e);
+                    }
+                }
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException e) {
+                        success = false;
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, "fos.close()", e);
+                    }
+                }
+            }
+        }
+        return success;
+    }
+
 
 
     /**

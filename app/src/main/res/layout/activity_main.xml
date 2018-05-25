@@ -213,5 +213,11 @@
             android:layout_height="match_parent"
             android:text="@string/bouton_exporter" />
 
+        <Button
+            android:id="@+id/bouton_importer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bouton_importer" />
+
     </LinearLayout>
 </ScrollView>
