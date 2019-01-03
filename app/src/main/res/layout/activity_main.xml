@@ -11,213 +11,43 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity">
+        android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".activities.MainActivity">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  xmlns:tools="http://schemas.android.com/tools"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
-                  android:paddingLeft="@dimen/activity_horizontal_margin"
-                  tools:context=".MainActivity">
 
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="153dp"
-                android:orientation="vertical">
-
-            <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="Lieu"/>
-
-            <EditText
-                    android:id="@+id/entree_lieu"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="textPersonName"/>
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="30dp"
-                    android:orientation="horizontal">
-
-                <TextView
-                        android:id="@+id/textView2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="X"/>
-
-                <TextView
-                        android:id="@+id/textView3"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Y"/>
-
-                <TextView
-                        android:id="@+id/textView4"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Z"/>
-            </LinearLayout>
-
-            <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                <EditText
-                        android:id="@+id/entree_x"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="number"/>
-
-                <EditText
-                        android:id="@+id/entree_y"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="number"/>
-
-                <EditText
-                        android:id="@+id/entree_z"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:ems="10"
-                        android:inputType="number"/>
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <TextView
-            android:id="@+id/label_captures"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/label_captures" />
-
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="66dp"
-                android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/bouton_capture_instantane"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_weight="1"
-                android:text="@string/bouton_capture_instantane" />
-
-            <Button
-                android:id="@+id/bouton_capture_5s"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/bouton_capture_5s" />
-
-            <Button
-                android:id="@+id/bouton_capture_10s"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/bouton_capture_10s" />
-
-        </LinearLayout>
-
-        <LinearLayout
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" android:layout_weight="1">
-
-            <TextView
-                android:id="@+id/label_prefixe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/label_prefixe" />
-            <EditText
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:inputType="textPersonName"
-                    android:ems="10"
-                    android:id="@+id/entree_prefix"/>
-        </LinearLayout>
-        <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-            <Button
-                android:id="@+id/bouton_balise_plus_proche"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/bouton_balise_plus_proche" />
-
-            <EditText
-                android:id="@+id/entree_balise_plus_proche"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ems="10"
-                android:inputType="textPersonName" />
-
-            <Button
-                android:id="@+id/bouton_estimer_lieu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/bouton_estimer_lieu" />
-
-            <TextView
-                android:id="@+id/label_texte_lieu_estime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/label_texte_lieu_estime" />
-
-            <EditText
-                    android:id="@+id/entree_lieu_estimation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"/>
-            <!--android:inputType="textPersonName" />-->
-
-            <Button
-                android:id="@+id/bouton_estimer_position"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/bouton_estimer_position" />
-
-            <TextView
-                android:id="@+id/label_position_estimee"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/label_position_estimee" />
-
-            <EditText
-                    android:id="@+id/entree_position_estimation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ems="10"
-                    android:inputType="textPersonName"/>
-            <!--tools:ignore="LabelFor" />-->
-        </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
         <Button
-            android:id="@+id/bouton_exporter"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="@string/bouton_exporter" />
-
-        <Button
-            android:id="@+id/bouton_importer"
+            android:id="@+id/measureActivityButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/bouton_importer" />
+            android:text="@string/measureActivityButtonText" />
+
+        <Button
+            android:id="@+id/testButtonActivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/testButtonActivityText" />
+
+        <Button
+            android:id="@+id/estimationActivityButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/estimationActivityButtonText" />
+
+        <Button
+            android:id="@+id/importExportActivityButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/importExportActivityButtonText" />
+
+        <Button
+            android:id="@+id/fingerprintManagerActivityButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/fingerprintManagerActivityButtonText" />
 
     </LinearLayout>
 </ScrollView>

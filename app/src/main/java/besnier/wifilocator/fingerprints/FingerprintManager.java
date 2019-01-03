@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.fingerprints;
 
 import android.util.Log;
 
@@ -17,6 +17,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import besnier.wifilocator.BuildConfig;
+import besnier.wifilocator.beacons.BeaconMeasure;
+import besnier.wifilocator.format.Position;
+import besnier.wifilocator.beacons.VectorizedBeacons;
+
 /**
  * Created by clement_besnier on 15/05/2018.
  */
@@ -24,7 +29,8 @@ import java.util.List;
 public class FingerprintManager {
     private static final String TAG = FingerprintManager.class.getSimpleName();
     private String filename;
-    String JSON_EXTENSION = ".json";
+    private String JSON_EXTENSION = ".json";
+    public static String DEFAULT_FILENAME = "wifi_data";
 
 
     public FingerprintManager(String filename)
@@ -33,6 +39,10 @@ public class FingerprintManager {
     }
 
 
+    /**
+     * @param folder where the fingerprints are stored
+     * @return list of fingerprints
+     */
     static public ArrayList<Fingerprint> loadFingerprints(File folder)
     {
         ArrayList<Fingerprint> lfp = new ArrayList<>();
@@ -47,6 +57,10 @@ public class FingerprintManager {
         return lfp;
     }
 
+    /**
+     * @param folder where the annotated fingerprints are stored
+     * @return  list of annotated fingerprints
+     */
     static public ArrayList<AnnotatedFingerprint> loadAnnotatedFingerprints(File folder)
     {
         ArrayList<AnnotatedFingerprint> lafp = new ArrayList<>();
@@ -62,6 +76,10 @@ public class FingerprintManager {
         return lafp;
     }
 
+    /**
+     * @param file file where a fingerprint is stored
+     * @return fingerprint
+     */
     static public Fingerprint loadFingerprint(File file)
     {
         Fingerprint fp = new Fingerprint();
@@ -69,6 +87,11 @@ public class FingerprintManager {
         return fp;
     }
 
+    /**
+     * @param folder_src where the file is
+     * @param folder_dst where the file will be
+     * @return has it worked?
+     */
     static public boolean exportFingerprints(File folder_src, File folder_dst)
     {
         boolean success = true;
@@ -170,6 +193,12 @@ public class FingerprintManager {
         return success;
     }
 
+    /**
+     * Import previous measures
+     * @param folder_src where the file is
+     * @param folder_dst where the file will be
+     * @return has it worked?
+     */
     static public boolean importFingerprints(File folder_src, File folder_dst)
     {
         boolean success = true;
@@ -257,24 +286,18 @@ public class FingerprintManager {
                 success = false;
                 e.printStackTrace();
             } finally {
-                if (osw != null) {
-                    try {
-                        osw.close();
-                    } catch (IOException e) {
-                        success = false;
-                        if (BuildConfig.DEBUG)
-                            Log.e(TAG, "osw.close()", e);
-                    }
-                }
-                if (fos != null) {
-                    try {
-                        fos.close();
-                    } catch (IOException e) {
-                        success = false;
-                        if (BuildConfig.DEBUG)
-                            Log.e(TAG, "fos.close()", e);
-                    }
-                }
+                if (osw != null)
+                {
+                    try {osw.close();} catch (IOException e) {success = false;
+//                        if (BuildConfig.DEBUG)
+//                            Log.e(TAG, "osw.close()", e);
+                }}
+                if (fos != null)
+                {
+                    try {fos.close();} catch (IOException e) {success = false;
+//                        if (BuildConfig.DEBUG)
+//                            Log.e(TAG, "fos.close()", e);
+                }}
             }
         }
         return success;
@@ -283,6 +306,7 @@ public class FingerprintManager {
 
 
     /**
+     * Computes the barycenter of fingerprints
      * @param lafp list ot annotated fingerprints
      * @param fp fingerprint currently measured
      * @param vb the way beacon signal power may be compared
@@ -319,6 +343,15 @@ public class FingerprintManager {
         res_pos.multiply_scalar(1/coefficient);
         return res_pos;
     }
+
+
+    /**
+     * Estimated location by choosing the location of the most similar fingerprint
+     * @param lfp all previous measured fingerprints
+     * @param fp_to_locate current fingerprint to locate
+     * @param vb vector of all beacons
+     * @return estimated location
+     */
     public String estimateLocation(List<Fingerprint> lfp, Fingerprint fp_to_locate, VectorizedBeacons vb)
     {
         long distance;
@@ -341,12 +374,20 @@ public class FingerprintManager {
         return lfp.get(i_mini_distance).getLocation();
     }
 
+    /**
+     * find the nearest WIFI beacon (the beacon from which we receive the strongest signal)
+     * @param fp a measure of all WIFI strengths
+     * @return SSID of the nearest WIFI beacon
+     */
     public String findNearestBeacon(Fingerprint fp)
     {
-        if(fp.lbm.size() > 0) {
+        if(fp.lbm.size() > 0)
+        {
             BeaconMeasure nearestBeaconMeasure = fp.lbm.get(0);
-            for (BeaconMeasure bm : fp.lbm) {
-                if (nearestBeaconMeasure.getLevel() < bm.getLevel()) {
+            for (BeaconMeasure bm : fp.lbm)
+            {
+                if (nearestBeaconMeasure.getLevel() < bm.getLevel())
+                {
                     nearestBeaconMeasure = bm;
                 }
             }
@@ -358,6 +399,10 @@ public class FingerprintManager {
         }
     }
 
+    /**
+     * @param fp fingerprint to be stored
+     * @param prefix_file recognizable prefix for file
+     */
     public void storeFingerprints(Fingerprint fp, File prefix_file)
     {
         FileOutputStream fos = null;
@@ -413,6 +458,10 @@ public class FingerprintManager {
         }
     }
 
+    /**
+     * @param lfp list of fingerprints
+     * @param prefix recognizable prefix for file
+     */
     public void storeFingerprints(List<Fingerprint> lfp, File prefix)
     {
         for(Fingerprint fp: lfp)

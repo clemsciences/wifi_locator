@@ -1,11 +1,13 @@
-package besnier.wifilocator;
+package besnier.wifilocator.fingerprints;
 
 import android.net.wifi.ScanResult;
-import org.json.JSONArray;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
+
+import besnier.wifilocator.format.Position;
 
 /**
  * Created by clement_besnier on 18/05/2018.

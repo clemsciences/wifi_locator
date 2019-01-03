@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.beacons;
 
 import org.json.JSONArray;
 
@@ -7,8 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import besnier.wifilocator.fingerprints.AnnotatedFingerprint;
+import besnier.wifilocator.fingerprints.Fingerprint;
+
 /**
  * Created by clement_besnier on 18/05/2018.
+ *
+ * JSON conversion is used to store and retrieve data
  */
 
 public class VectorizedBeacons {

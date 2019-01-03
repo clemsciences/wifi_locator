@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.beacons;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -20,6 +20,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import besnier.wifilocator.BuildConfig;
+import besnier.wifilocator.fingerprints.Fingerprint;
 
 /**
  * Created by clement_besnier on 18/05/2018.

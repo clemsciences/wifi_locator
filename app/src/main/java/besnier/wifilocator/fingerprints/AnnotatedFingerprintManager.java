@@ -1,5 +1,6 @@
-package besnier.wifilocator;
+package besnier.wifilocator.fingerprints;
 
+import android.content.Context;
 import android.os.Environment;
 import android.util.Log;
 
@@ -13,6 +14,8 @@ import java.io.OutputStreamWriter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import besnier.wifilocator.BuildConfig;
 
 /**
  * Created by clement_besnier on 18/05/2018.
@@ -139,5 +142,12 @@ public class AnnotatedFingerprintManager {
         {
             storeFingerprints(fp);
         }
+    }
+
+    public void retrieveFingerprintFiles(Context context)
+    {
+        context.getFilesDir();
+
+
     }
 }

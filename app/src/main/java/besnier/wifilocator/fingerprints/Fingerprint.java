@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.fingerprints;
 
 import android.net.wifi.ScanResult;
 import android.util.Log;
@@ -11,8 +11,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import besnier.wifilocator.BuildConfig;
+import besnier.wifilocator.beacons.BeaconMeasure;
+import besnier.wifilocator.beacons.VectorizedBeacons;
+
 /**
  * Created by clement_besnier on 15/05/2018.
+ *
  */
 
 public class Fingerprint {
@@ -24,17 +29,33 @@ public class Fingerprint {
     public ArrayList<Long> vectorizedMeasure = new ArrayList<>();
 
 
+    /**
+     * location is not necessary when we estimate the location because we only refer to the locations of a given list of fingerprints
+     * @param lsr list of scan results
+     * @param timestamp when the measure was made
+     */
+    public Fingerprint(List<ScanResult> lsr, long timestamp)
+    {
+        for(ScanResult sr : lsr)
+        {
+            lbm.add(new BeaconMeasure(sr.SSID, sr.BSSID, sr.capabilities, sr.frequency, sr.level, sr.timestamp));
+        }
+        this.timestamp = timestamp;
+    }
 
 
+    /**
+     * Used when the location is necessary : when the fingerprint is compared to a reference fingerprint
+     * @param lsr list of scan measures
+     * @param location given location
+     * @param timestamp when it was measured
+     */
     public Fingerprint(List<ScanResult> lsr, String location, long timestamp)
     {
         this.location = location;
-        BeaconMeasure bm;
-
         for(ScanResult sr : lsr)
         {
-            bm = new BeaconMeasure(sr.SSID, sr.BSSID, sr.capabilities, sr.frequency, sr.level, sr.timestamp);
-            lbm.add(bm);
+            lbm.add(new BeaconMeasure(sr.SSID, sr.BSSID, sr.capabilities, sr.frequency, sr.level, sr.timestamp));
         }
         this.timestamp = timestamp;
     }
@@ -110,14 +131,18 @@ public class Fingerprint {
             element.put("fingerprint", json_array);
 
 
-        if(location.equals(""))
-        {
-            element.put("location", "NOWHERE");
-        }
-        else
-        {
-            element.put("location", location);
-        }
+            if(location.equals(""))
+            {
+                element.put("location", "NOWHERE");
+            }
+            else
+            {
+                element.put("location", location);
+            }
+            if(timestamp != 0)
+            {
+                element.put("timestamp", timestamp);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -179,12 +204,10 @@ public class Fingerprint {
             try
             {
                 JSONObject object = new JSONObject(sb.toString());
-
                 if(BuildConfig.DEBUG)
                 {
                     Log.d(TAG, object.toString());
                 }
-
                 fromJSON(object);
             }
             catch (JSONException e)
@@ -195,6 +218,9 @@ public class Fingerprint {
         }
     }
 
+    /**
+     * @param vb vectore of beacons (it is like a list of beacon features
+     */
     public void vectorizeMeasure(VectorizedBeacons vb)
     {
         boolean found;
@@ -207,17 +233,13 @@ public class Fingerprint {
                 {
                     vectorizedMeasure.add(bm.getLevel());
                     found = true;
-
                 }
             }
             if (!found)
             {
                 vectorizedMeasure.add((long) 0);
             }
-
-
         }
-
     }
 
 

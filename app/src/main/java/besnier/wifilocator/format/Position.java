@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.format;
 
 import org.json.JSONException;
 import org.json.JSONObject;

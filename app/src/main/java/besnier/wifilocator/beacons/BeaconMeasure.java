@@ -1,4 +1,4 @@
-package besnier.wifilocator;
+package besnier.wifilocator.beacons;
 
 import android.net.wifi.ScanResult;
 
