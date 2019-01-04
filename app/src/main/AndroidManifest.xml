@@ -31,7 +31,8 @@
         <activity android:name=".activities.TestActivity" />
         <activity android:name=".activities.EstimationActivity" />
         <activity android:name=".activities.ImportExportActivity" />
-        <activity android:name=".activities.FingerprintFileManagerActivity"></activity>
+        <activity android:name=".activities.FingerprintFileManagerActivity" />
+        <activity android:name=".MeasureContentActivity"></activity>
     </application>
 
 </manifest>

@@ -151,6 +151,61 @@ public class Fingerprint {
 
     }
 
+    static public String loadRawFile(File file)
+    {
+        if(file.isFile()) {
+            StringBuilder sb = new StringBuilder();
+            FileInputStream fis = null;
+            InputStreamReader isr = null;
+            BufferedReader br = null;
+            try {
+                fis = new FileInputStream(file);
+                isr = new InputStreamReader(fis);
+                br = new BufferedReader(isr);
+                String resultat;
+                while ((resultat = br.readLine()) != null) {
+                    if (sb.length() > 0) {
+                        sb.append("\n");
+                    }
+                    sb.append(resultat);
+                }
+            } catch (IOException e) {
+                if (BuildConfig.DEBUG)
+                    Log.e(TAG, e.toString());
+            } finally {
+                if (br != null) {
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+                if (isr != null) {
+                    try {
+                        isr.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+                if (fis != null) {
+                    try {
+                        fis.close();
+                    } catch (IOException e) {
+                        if (BuildConfig.DEBUG)
+                            Log.e(TAG, e.toString());
+                    }
+                }
+            }
+            return sb.toString();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
 
     public void load(File file)
     {

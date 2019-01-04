@@ -17,7 +17,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
+import besnier.wifilocator.MeasureContentActivity;
 import besnier.wifilocator.R;
+import besnier.wifilocator.fingerprints.Fingerprint;
 
 public class FingerprintFileManagerActivity extends AppCompatActivity {
     private static final String TAG = FingerprintFileManagerActivity.class.getSimpleName();
@@ -73,6 +75,13 @@ public class FingerprintFileManagerActivity extends AppCompatActivity {
                     i.putExtra("dossier", touchedFile.getName());
                     startActivity(i);
                 }
+                if(touchedFile.isFile())
+                {
+                    Intent i = new Intent(FingerprintFileManagerActivity.this, MeasureContentActivity.class);
+                    i.putExtra("data", Fingerprint.loadRawFile(touchedFile));
+                    startActivity(i);
+
+                }
 
 
                 Log.d(TAG, "On peut appuyer dessus");
@@ -81,46 +90,56 @@ public class FingerprintFileManagerActivity extends AppCompatActivity {
 
 
     }
-}
-
-class FileAdapter extends ArrayAdapter<File>
-{
-    public FileAdapter(Context context, ArrayList<File> files)
+    class FileAdapter extends ArrayAdapter<File>
     {
-        super(context, 0, files);
-    }
-
-    @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        if(convertView == null)
+        public FileAdapter(Context context, ArrayList<File> files)
         {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_filename, parent, false);
-        }
-        MiniEntreeVueTeneur vue_teneur = (MiniEntreeVueTeneur) convertView.getTag();
-        if(vue_teneur == null)
-        {
-            vue_teneur = new MiniEntreeVueTeneur();
-            vue_teneur.mini_date_vue = convertView.findViewById(R.id.mini_date_vue);
-            vue_teneur.mini_prefix_vue = convertView.findViewById(R.id.mini_prefix_vue);
-            vue_teneur.mini_chemin_vue = convertView.findViewById(R.id.mini_chemin_vue);
-            convertView.setTag(vue_teneur);
+            super(context, 0, files);
         }
 
-        File file = getItem(position);
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            if(convertView == null)
+            {
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.activity_filename, parent, false);
+            }
+            MiniEntreeVueTeneur vue_teneur = (MiniEntreeVueTeneur) convertView.getTag();
+            if(vue_teneur == null)
+            {
+                vue_teneur = new MiniEntreeVueTeneur();
+                vue_teneur.mini_date_vue = convertView.findViewById(R.id.mini_date_vue);
+                vue_teneur.mini_prefix_vue = convertView.findViewById(R.id.mini_prefix_vue);
+                vue_teneur.mini_chemin_vue = convertView.findViewById(R.id.mini_chemin_vue);
+                convertView.setTag(vue_teneur);
+            }
 
-        vue_teneur.mini_date_vue.setText(new Date(file.lastModified()).toString());
-        vue_teneur.mini_chemin_vue.setText(file.getParent().toString());
-        vue_teneur.mini_prefix_vue.setText(file.getName().toString());
+            File file = getItem(position);
+
+            vue_teneur.mini_date_vue.setText(new Date(file.lastModified()).toString());
+            vue_teneur.mini_chemin_vue.setText(file.getParent());
+            vue_teneur.mini_prefix_vue.setText(file.getName());
+
+            if(file.isFile())
+            {
+                convertView.setBackgroundColor(getContext().getResources().getColor(R.color.fichier_couleur));
+            }
+            if(file.isDirectory())
+            {
+                convertView.setBackgroundColor(getContext().getResources().getColor(R.color.dossier_couleur));
+            }
 
 
-        return convertView;
-    }
 
-    private class MiniEntreeVueTeneur
-    {
-        public TextView mini_date_vue;
-        public TextView mini_prefix_vue;
-        public TextView mini_chemin_vue;
+            return convertView;
+        }
+
+        private class MiniEntreeVueTeneur
+        {
+            public TextView mini_date_vue;
+            public TextView mini_prefix_vue;
+            public TextView mini_chemin_vue;
+        }
+
     }
 
 }
