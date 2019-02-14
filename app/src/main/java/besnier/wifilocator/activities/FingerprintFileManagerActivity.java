@@ -26,7 +26,6 @@ public class FingerprintFileManagerActivity extends AppCompatActivity {
 
     ListView liste_fichiers_vue;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +43,6 @@ public class FingerprintFileManagerActivity extends AppCompatActivity {
         {
             baseFolder = getBaseContext().getFilesDir();
         }
-
-
 
         Log.d(TAG, "on prend la liste de fichiers ici "+baseFolder);
         for(File fileInDirectory : baseFolder.listFiles())
@@ -80,10 +77,7 @@ public class FingerprintFileManagerActivity extends AppCompatActivity {
                     Intent i = new Intent(FingerprintFileManagerActivity.this, MeasureContentActivity.class);
                     i.putExtra("data", Fingerprint.loadRawFile(touchedFile));
                     startActivity(i);
-
                 }
-
-
                 Log.d(TAG, "On peut appuyer dessus");
             }
         });
